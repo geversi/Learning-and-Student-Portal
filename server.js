@@ -133,7 +133,7 @@ function requireToken(typ) {
 }
 const extra = (code) => (devReturnCode ? { devCode: code } : {});
 
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+app.get('/', (req, res) => { res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-src https:; connect-src 'self';"); res.sendFile(require('path').join(__dirname, 'index.html')); }); app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 app.post('/api/signup', authLimiter, wrap(async (req, res) => {
   const email = normEmail(req.body.email), pw = typeof req.body.password === 'string' ? req.body.password : '';
