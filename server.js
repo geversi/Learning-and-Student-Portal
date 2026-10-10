@@ -142,7 +142,7 @@ app.post('/api/signup', authLimiter, wrap(async (req, res) => {
   const ex = await users.findOne({ email });
   if (ex && ex.verified) throw new HttpError(409, 'כתובת המייל כבר רשומה. עברו להתחברות.');
   const passHash = await bcrypt.hash(pw, 12);
-  await users.updateOne({ email }, { $set: { passHash, verified: false }, $setOnInsert: { createdAt: new Date() } }, { upsert: true });
+  await users.updateOne({ email }, { $set: { passHash,  }, $setOnInsert: { createdAt: new Date() } }, { upsert: true });
   const code = await issueCode(email, 'signup');
   res.json({ needsCode: true, ...extra(code) });
 }));
