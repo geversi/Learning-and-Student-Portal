@@ -543,7 +543,7 @@
     APP_NAME: 'פורטל למידה ותלמידים',
     ALLOWED_DOMAIN: 'manhischools.org.il',   // רק מיילים שמסתיימים ב-@הדומיין הזה
     BACKEND: 'mongo',                        // 'mongo' (שרת ה-API שלכם + MongoDB) | 'local' (בדפדפן בלבד, להדגמה) | 'custom'
-    API_URL: 'http://localhost:3000',        // כתובת שרת ה-API (תיקיית mongo-server). בייצור: https://הדומיין-שלכם
+    API_URL: window.location.origin,        // כתובת שרת ה-API (תיקיית mongo-server). בייצור: https://הדומיין-שלכם
     REQUIRE_EMAIL_CODE: true,                // (מצב local בלבד) בשרת האימות תמיד חובה
     SHOW_DEV_NOTICE: true                    // הודעת פיתוח במסך הכניסה (אפשר לכבות)
   };
