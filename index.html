@@ -260,6 +260,23 @@
     #gLib { padding:20px 14px 40px; }
   }
   @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+  .sofi-panel { margin:12px 0 24px; padding:20px; border:1px solid #d8cce9; border-radius:14px; background:linear-gradient(135deg,#fffdf7 0%,#f5f1ff 100%); box-shadow:0 8px 24px rgba(60,42,96,.08); }
+  .sofi-head { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .sofi-avatar { width:48px; height:48px; flex:none; display:grid; place-items:center; border-radius:50%; background:#e9ddff; font-size:26px; }
+  .sofi-head h3 { color:#33264d; font-size:1.15rem; }
+  .sofi-head p { color:#625774; font-size:.9rem; }
+  .sofi-controls { display:flex; align-items:center; gap:10px; margin:12px 0; flex-wrap:wrap; }
+  .sofi-controls label { font-weight:600; color:#43345e; }
+  .sofi-controls select { min-width:190px; }
+  .sofi-log { display:flex; flex-direction:column; gap:10px; min-height:110px; max-height:360px; overflow:auto; padding:14px; border:1px solid #e3dcef; border-radius:10px; background:#fff; }
+  .sofi-msg { max-width:min(90%,700px); padding:10px 13px; border-radius:12px; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .sofi-msg strong { display:block; margin-bottom:3px; font-size:.82rem; }
+  .sofi-msg.user { align-self:flex-start; background:#e8f0fa; color:#14325c; }
+  .sofi-msg.assistant { align-self:flex-end; background:#f1ebff; color:#33264d; }
+  .sofi-msg.status { align-self:center; color:#5b6878; background:#f4f6f9; font-size:.9rem; }
+  .sofi-note { margin-top:10px; color:#655a72; font-size:.82rem; }
+  .search select { min-width:150px; }
+  @media(max-width:520px) { .sofi-panel { padding:14px; } .sofi-controls select { flex:1; min-width:100%; } .sofi-msg { max-width:100%; } }
 </style>
 </head>
 <body>
@@ -375,11 +392,18 @@
           <option value="google">Google</option>
           <option value="wiki">ויקיפדיה</option>
           <option value="img">תמונות (Google)</option>
+          <option value="ai">✨ סופי המורה — עוזרת AI</option>
         </select>
         <input class="field" id="q" name="q" type="search" placeholder="חיפוש מהיר באינטרנט..." aria-label="חיפוש" required>
         <input type="hidden" id="tbm" name="tbm" value="isch" disabled>
-        <button class="btn" type="submit">חפש</button>
+        <button class="btn" id="searchButton" type="submit">חפש</button>
       </form>
+      <section class="sofi-panel hidden" id="sofiPanel" aria-labelledby="sofiTitle">
+        <div class="sofi-head"><div class="sofi-avatar" aria-hidden="true">👩🏻‍🏫</div><div><h3 id="sofiTitle">סופי המורה</h3><p>אני כאן כדי להסביר, לתרגל ולעזור לך להבין — בקצב שלך.</p></div></div>
+        <div class="sofi-controls"><label for="sofiLevel">רמת לימוד:</label><select class="field" id="sofiLevel"><option value="צעירים (א׳–ג׳)">צעירים · א׳–ג׳</option><option value="יסודי (ד׳–ו׳)" selected>יסודי · ד׳–ו׳</option><option value="חטיבה (ז׳–ט׳)">חטיבה · ז׳–ט׳</option><option value="תיכון (י׳–י״ב)">תיכון · י׳–י״ב</option></select></div>
+        <div class="sofi-log" id="sofiLog" role="log" aria-live="polite" aria-relevant="additions text"><div class="sofi-msg assistant"><strong>סופי</strong>היי! 😊 כתבו את השאלה בתיבת החיפוש למעלה ולחצו ״שאלי את סופי״. אפשר לשאול על שיעורים, לבקש דוגמה או לתרגל יחד.</div></div>
+        <p class="sofi-note">תשובות AI עלולות לטעות. אל תכתבו כאן שם מלא, פרטי קשר או מידע אישי.</p>
+      </section>
 
       <h2>מערכות וכלים</h2>
       <p class="sub">בחרו מערכת כדי לפתוח אותה בלשונית חדשה.</p>
@@ -873,15 +897,48 @@
   var ENGINES = {
     google: { action: 'https://www.google.com/search', name: 'q', tbm: false },
     wiki:   { action: 'https://he.wikipedia.org/w/index.php', name: 'search', tbm: false },
-    img:    { action: 'https://www.google.com/search', name: 'q', tbm: true }
+    img:    { action: 'https://www.google.com/search', name: 'q', tbm: true },
+    ai:     { action: '#', name: 'q', tbm: false }
   };
+  var sofiMessages = [], sofiBusy = false;
   function applyEngine() {
+    var isAI = $('#engine').value === 'ai';
     var c = ENGINES[$('#engine').value] || ENGINES.google, f = $('#searchForm');
-    f.action = c.action; $('#q').name = c.name; $('#tbm').disabled = !c.tbm;
+    f.action = c.action; f.target = isAI ? '_self' : '_blank';
+    $('#q').name = c.name; $('#tbm').disabled = !c.tbm;
+    $('#sofiPanel').classList.toggle('hidden', !isAI);
+    $('#searchButton').textContent = isAI ? 'שאלי את סופי' : 'חפש';
+    $('#q').placeholder = isAI ? 'כתבו שאלה לסופי...' : 'חיפוש מהיר באינטרנט...';
+  }
+  function addSofiMessage(role, text) {
+    var row = document.createElement('div'); row.className = 'sofi-msg ' + role;
+    var who = document.createElement('strong'); who.textContent = role === 'user' ? 'את/ה' : (role === 'assistant' ? 'סופי' : 'הודעה');
+    var body = document.createElement('span'); body.textContent = text;
+    row.appendChild(who); row.appendChild(body); $('#sofiLog').appendChild(row);
+    $('#sofiLog').scrollTop = $('#sofiLog').scrollHeight;
+  }
+  async function sendToSofi(question) {
+    if (sofiBusy) return;
+    var backend = Backends[CONFIG.BACKEND];
+    if (!backend || !backend._s || !backend._s.token) { addSofiMessage('status', 'כדי לדבר עם סופי צריך להתחבר קודם לחשבון.'); return; }
+    if (CONFIG.BACKEND !== 'mongo') { addSofiMessage('status', 'סופי זמינה כרגע בחיבור הפורטל לשרת.'); return; }
+    sofiBusy = true; $('#searchButton').disabled = true;
+    sofiMessages.push({ role: 'user', content: question }); addSofiMessage('user', question);
+    var status = document.createElement('div'); status.className = 'sofi-msg status'; status.textContent = 'סופי חושבת…'; $('#sofiLog').appendChild(status);
+    try {
+      var result = await Backends.mongo._req('/api/assistant', { method: 'POST', auth: true, body: { level: $('#sofiLevel').value, messages: sofiMessages.slice(-10) } });
+      status.remove();
+      if (!result || typeof result.answer !== 'string') throw new Error('התשובה לא התקבלה');
+      sofiMessages.push({ role: 'assistant', content: result.answer }); addSofiMessage('assistant', result.answer);
+      $('#q').value = '';
+    } catch (err) { status.textContent = err && err.message ? err.message : 'סופי לא זמינה כרגע. נסו שוב.'; }
+    finally { sofiBusy = false; $('#searchButton').disabled = false; }
   }
   $('#engine').addEventListener('change', applyEngine);
   $('#searchForm').addEventListener('submit', function (e) {
-    if (!$('#q').value.trim()) { e.preventDefault(); return; }
+    var question = $('#q').value.trim();
+    if (!question) { e.preventDefault(); return; }
+    if ($('#engine').value === 'ai') { e.preventDefault(); sendToSofi(question); return; }
     applyEngine();
   });
   applyEngine();
