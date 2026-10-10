@@ -678,7 +678,7 @@
       try { var j = await this._req('/api/me', { auth: true }); this._s.user = j.user; return { user: j.user }; }
       catch (e) { if (e.status === 401 || e.status === 403) LS.del('sp_mg'); this._s = null; return null; }
     },
-    signUp: async function (email, pw) { var j = await this._req('/api/signup', { method: 'POST', body: { email: email, password: pw } }); return { needsCode: true, demoCode: j.devCode }; },
+    signUp: async function (email, pw) { var j = await this._req('/api/signup', { method: 'POST', body: { email: email, password: pw } }); if (j.token && j.user) return { session: this._adopt(j) }; return { needsCode: true, demoCode: j.devCode }; },
     verifyCode: async function (email, code, purpose) {
       var j = await this._req('/api/verify', { method: 'POST', body: { email: email, code: String(code).trim(), purpose: purpose } });
       if (purpose === 'signup') return { session: this._adopt(j) };
