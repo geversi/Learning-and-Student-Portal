@@ -17,6 +17,38 @@
   .muted { color:var(--muted); }
   button, input, select, textarea { font:inherit; color:inherit; }
   :focus-visible { outline:3px solid #f2a900; outline-offset:2px; }
+  :root[data-theme="dark"] { color-scheme:dark; --navy:#172b46; --blue:#79b3ff; --sky:#26384e; --line:#3b4b60; --bg:#101923; --text:#e6edf7; --muted:#aab7c8; --red:#ff9388; --green:#69d79a; }
+  :root[data-theme="dark"] .tabs, :root[data-theme="dark"] #portal footer,
+  :root[data-theme="dark"] .card, :root[data-theme="dark"] .tile,
+  :root[data-theme="dark"] .field, :root[data-theme="dark"] table.sched,
+  :root[data-theme="dark"] table.ex, :root[data-theme="dark"] table.gr input,
+  :root[data-theme="dark"] .nlist li button, :root[data-theme="dark"] .keys button,
+  :root[data-theme="dark"] .btn.ghost { background:#192635; color:var(--text); }
+  :root[data-theme="dark"] .btn.ghost { border-color:var(--line); }
+  :root[data-theme="dark"] .tile.accent { background:#1d3045; }
+  :root[data-theme="dark"] .tile .ico { background:#26384e; }
+  :root[data-theme="dark"] .field { border-color:var(--line); }
+  :root[data-theme="dark"] table.sched th, :root[data-theme="dark"] table.ex th { background:#26384e; color:#e6edf7; }
+  :root[data-theme="dark"] table.sched td.hr, :root[data-theme="dark"] table.sched tr.brk td { background:#182330; }
+  :root[data-theme="dark"] table.sched tr.nowrow td { background:#3a3520; }
+  :root[data-theme="dark"] .nlist li button.on { background:#26384e; }
+  :root[data-theme="dark"] .auth-box { background:#192635; color:var(--text); }
+  :root[data-theme="dark"] .auth-box label, :root[data-theme="dark"] .auth-head h1 { color:var(--text); }
+  :root[data-theme="dark"] .sofi-panel { background:linear-gradient(135deg,#202a35,#27233a); border-color:#494262; }
+  :root[data-theme="dark"] .sofi-msg.assistant { background:#322d49; }
+  .settings-grid { display:grid; gap:14px; }
+  .settings-card h3 { color:var(--navy); font-size:1rem; margin-bottom:6px; }
+  .settings-card > p { color:var(--muted); font-size:.88rem; margin-bottom:12px; }
+  .settings-line { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+  .settings-line label { display:flex; align-items:center; gap:8px; }
+  .notify-list { display:grid; gap:8px; margin-top:14px; }
+  .notify-row { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.45); }
+  .notify-row input { margin-top:5px; accent-color:var(--blue); }
+  .notify-row strong { display:block; color:var(--navy); }
+  .notify-row small { display:block; color:var(--muted); }
+  .settings-status { min-height:1.4em; margin-top:9px; color:var(--green); font-size:.88rem; }
+  :root[data-theme="dark"] .notify-row { background:#192635; }
+  .auth-help { margin-top:10px; color:var(--muted); font-size:.8rem; text-align:center; }
 
   /* ========== PORTAL SHELL ========== */
   #portal { min-height:100vh; display:flex; flex-direction:column; }
@@ -295,7 +327,7 @@
       <label>אימייל לימודי<input class="field" id="lEmail" type="email" autocomplete="username"></label>
       <label>סיסמה<input class="field" id="lPw" type="password" autocomplete="current-password"></label>
       <button class="btn" type="submit">כניסה</button>
-      <button class="linkbtn" type="button" id="toForgot">שכחתי סיסמה</button>
+      <p class="auth-help">אין שחזור סיסמה אוטומטי כרגע. אם שכחתם את הסיסמה, פנו למנהל/ת הפורטל.</p>
     </form>
 
     <form id="fReg" class="hidden" novalidate>
@@ -312,20 +344,6 @@
       <button class="btn" type="submit">אימות</button>
       <button class="linkbtn" type="button" id="resendCode">שלחו לי קוד חדש</button>
       <button class="linkbtn toLogin" type="button" style="margin-inline-start:14px">חזרה</button>
-    </form>
-
-    <form id="fForgot" class="hidden" novalidate>
-      <p class="hint">הקלידו את המייל הלימודי ונשלח אליו קוד לאיפוס הסיסמה.</p>
-      <label>אימייל לימודי<input class="field" id="fgEmail" type="email"></label>
-      <button class="btn" type="submit">שלחו קוד</button>
-      <button class="linkbtn toLogin" type="button">חזרה</button>
-    </form>
-
-    <form id="fNewPw" class="hidden" novalidate>
-      <p class="hint">בחרו סיסמה חדשה.</p>
-      <label>סיסמה חדשה<input class="field" id="npPw" type="password" autocomplete="new-password"></label>
-      <label>אימות סיסמה<input class="field" id="npPw2" type="password" autocomplete="new-password"></label>
-      <button class="btn" type="submit">שמירה וכניסה</button>
     </form>
 
     <div class="auth-msg" id="authMsg" role="status"></div>
@@ -356,6 +374,7 @@
       <button class="tab" data-page="timer">טיימר למידה</button>
       <button class="tab" data-page="grades">ממוצע ציונים</button>
       <button class="tab" data-page="notes">פתקים</button>
+      <button class="tab" data-page="settings">הגדרות</button>
     </div>
   </nav>
 
@@ -510,19 +529,53 @@
         <div class="editor card" id="nEd"></div>
       </div>
     </section>
+    <!-- SETTINGS -->
+    <section class="page hidden" id="page-settings">
+      <h2>הגדרות</h2>
+      <p class="sub">מראה הפורטל, תזכורות וקוד הגישה לספריית המשחקים.</p>
+      <div class="settings-grid">
+        <div class="card settings-card">
+          <h3>מראה</h3>
+          <p>בחרו ערכת נושא קבועה או התאמה להגדרת המכשיר.</p>
+          <div class="settings-line"><label for="themeSelect">ערכת נושא:</label>
+            <select class="field" id="themeSelect">
+              <option value="device">כמו במכשיר</option><option value="light">בהיר</option><option value="dark">כהה</option>
+            </select>
+          </div>
+        </div>
+        <div class="card settings-card">
+          <h3>התראות ותזכורות</h3>
+          <p>כדי לקבל התראות בדפדפן, לחצו על „אפשר את כולן” ואשרו את בקשת Chrome. התזכורות נבדקות כשהפורטל פתוח.</p>
+          <div class="settings-line">
+            <button type="button" class="btn" id="notifyAll">אפשר את כולן</button>
+            <button type="button" class="btn ghost" id="notifyNone">כבה את כולן</button>
+            <button type="button" class="btn ghost" id="notifyTest">שליחת התראת בדיקה</button>
+          </div>
+          <div class="settings-status" id="notifyStatus" role="status" aria-live="polite"></div>
+          <div class="notify-list">
+            <label class="notify-row"><input type="checkbox" data-reminder="schedule"><span><strong>מערכת השעות הבאה</strong><small>תזכורת בערב על יום הלימודים הבא ומה כדאי להכין.</small></span></label>
+            <label class="notify-row"><input type="checkbox" data-reminder="exams"><span><strong>הכנה למבחנים</strong><small>תזכורות שבוע ויום לפני מבחן קרוב, עם המקצוע והצעה להתחיל ללמוד.</small></span></label>
+            <label class="notify-row"><input type="checkbox" data-reminder="tasks"><span><strong>שיעורי בית ומשימות</strong><small>תזכורת בערב לפני מועד הגשה ובבוקר של יום ההגשה.</small></span></label>
+            <label class="notify-row"><input type="checkbox" data-reminder="timer"><span><strong>סיום טיימר למידה</strong><small>הודעה כשהטיימר מסתיים, אם הפורטל עדיין פתוח.</small></span></label>
+          </div>
+        </div>
+        <div class="card settings-card">
+          <h3>ספריית המשחקים</h3>
+          <p>הזן כאן את קוד הגישה כדי לפתוח את הספרייה. ההגדרה נמצאת כאן יחד עם שאר ההגדרות.</p>
+          <div class="settings-line">
+            <input class="field" type="password" id="settingsGameCode" autocomplete="off" aria-label="קוד גישה למשחקים" placeholder="קוד גישה">
+            <button type="button" class="btn ghost" id="settingsGameCodeBtn">פתח משחקים</button>
+          </div>
+          <div class="settings-status" id="settingsGameMsg" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
     <div class="footer-inner">
       <span>© פורטל תלמידים · כל הזכויות שמורות</span>
-      <details class="adv">
-        <summary>הגדרות מתקדמות</summary>
-        <div class="adv-box">
-          <input type="password" id="advInput" autocomplete="off" aria-label="קוד" placeholder="קוד גישה">
-          <button type="button" id="advBtn">אישור</button>
-        </div>
-        <div id="advMsg" role="status"></div>
-      </details>
+
     </div>
   </footer>
 </div>
@@ -762,7 +815,7 @@
      מסך כניסה / הרשמה
   ====================================================== */
   var pend = { email: '', purpose: 'signup' }, started = false;
-  var FORMS = ['fLogin', 'fReg', 'fCode', 'fForgot', 'fNewPw'];
+  var FORMS = ['fLogin', 'fReg', 'fCode'];
   function authMsg(t, ok) { var m = $('#authMsg'); m.textContent = t || ''; m.className = 'auth-msg' + (ok ? ' ok' : ''); }
   function view(id) {
     FORMS.forEach(function (f) { $('#' + f).classList.toggle('hidden', f !== id); });
@@ -794,7 +847,7 @@
   }
   function wireAuth() {
     var ph = 'name@' + CONFIG.ALLOWED_DOMAIN;
-    ['lEmail', 'rEmail', 'fgEmail'].forEach(function (id) { $('#' + id).placeholder = ph; });
+    ['lEmail', 'rEmail'].forEach(function (id) { $('#' + id).placeholder = ph; });
     $('#authDomain').textContent = '@' + CONFIG.ALLOWED_DOMAIN;
     var warn = [];
     if (!storageOK) warn.push('האחסון בדפדפן חסום. כנראה שהקובץ נפתח בתצוגה מקדימה מוגבלת (למשל בתוך האפליקציה). פתחו אותו ב-Chrome או Safari כדי שהחשבון, החיפוש והמשחקים החיצוניים יעבדו.');
@@ -802,7 +855,6 @@
     if (warn.length) { var w = $('#authWarn'); w.textContent = warn.join(' '); w.classList.remove('hidden'); }
 
     $('#authTabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) view(b.dataset.v); });
-    $('#toForgot').addEventListener('click', function () { view('fForgot'); });
     $$('.toLogin').forEach(function (b) { b.addEventListener('click', function () { view('fLogin'); }); });
 
     $('#fLogin').addEventListener('submit', function (e) {
@@ -825,14 +877,6 @@
         $('#codeTo').textContent = em; view('fCode'); authMsg('שלחנו קוד אימות למייל.', true);
       });
     });
-    $('#fForgot').addEventListener('submit', function (e) {
-      e.preventDefault();
-      run(e.target, async function () {
-        var em = emailOrFail($('#fgEmail').value), r = await Auth.forgot(em);
-        pend = { email: em, purpose: 'recovery' }; showDemo(r.demoCode);
-        $('#codeTo').textContent = em; view('fCode'); authMsg('אם הכתובת רשומה, נשלח אליה קוד.', true);
-      });
-    });
     $('#fCode').addEventListener('submit', function (e) {
       e.preventDefault();
       run(e.target, async function () {
@@ -840,21 +884,11 @@
         if (!/^\d{6,8}$/.test(code)) throw new Error('הקלידו את הקוד שקיבלתם (ספרות בלבד)');
         var r = await Auth.verifyCode(pend.email, code, pend.purpose);
         $('#cCode').value = ''; showDemo(null);
-        if (r.session) await onLogin(r.session); else view('fNewPw');
+        if (r.session) await onLogin(r.session); else throw new Error('איפוס סיסמה אינו זמין כרגע. פנו למנהל/ת הפורטל.');
       });
     });
     $('#resendCode').addEventListener('click', function () {
       run($('#fCode'), async function () { var r = await Auth.resendCode(pend.email, pend.purpose); showDemo(r && r.demoCode); authMsg('נשלח קוד חדש.', true); });
-    });
-    $('#fNewPw').addEventListener('submit', function (e) {
-      e.preventDefault();
-      run(e.target, async function () {
-        var pw = $('#npPw').value;
-        if (pw.length < 8) throw new Error('הסיסמה חייבת להכיל לפחות 8 תווים');
-        if (pw !== $('#npPw2').value) throw new Error('הסיסמאות לא תואמות');
-        await Auth.setPassword(pend.email, pw);
-        var r = await Auth.signIn(pend.email, pw); await onLogin(r.session);
-      });
     });
     $('#logoutBtn').addEventListener('click', async function () { store.flush(); await Auth.signOut(); location.reload(); });
   }
@@ -879,9 +913,100 @@
     if (id === 'home') renderHome();
     if (id === 'sched') buildSched();
     if (id === 'exams') renderExams();
+    if (id === 'settings') renderSettings();
     window.scrollTo(0, 0);
   }
   $$('.tab').forEach(function (t) { t.addEventListener('click', function () { showPage(t.dataset.page); }); });
+
+  var themeMode = store.get('themeMode', 'device');
+  var notifyPrefs = store.get('notificationPrefs', { schedule: false, exams: false, tasks: false, timer: false });
+  var reminderKeys = ['schedule', 'exams', 'tasks', 'timer'];
+  reminderKeys.forEach(function (k) { notifyPrefs[k] = !!notifyPrefs[k]; });
+  function applyTheme() {
+    var effective = themeMode;
+    if (effective === 'device') effective = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', effective);
+  }
+  function saveNotifyPrefs() { store.set('notificationPrefs', notifyPrefs); renderSettings(); }
+  function renderSettings() {
+    $('#themeSelect').value = themeMode;
+    $('[data-reminder]').forEach(function (el) { el.checked = !!notifyPrefs[el.dataset.reminder]; });
+    var state = !('Notification' in window) ? 'הדפדפן הזה אינו תומך בהתראות.' :
+      Notification.permission === 'granted' ? 'התראות הדפדפן מאושרות.' :
+      Notification.permission === 'denied' ? 'התראות נחסמו בהגדרות הדפדפן. אפשר לשנות זאת ליד כתובת האתר ב-Chrome.' :
+      'עדיין לא ניתנה הרשאה להתראות.';
+    $('#notifyStatus').textContent = state;
+  }
+  async function ensureNotificationPermission() {
+    if (!('Notification' in window)) { $('#notifyStatus').textContent = 'הדפדפן הזה אינו תומך בהתראות.'; return false; }
+    if (Notification.permission === 'granted') return true;
+    if (Notification.permission === 'denied') { $('#notifyStatus').textContent = 'ההתראות חסומות. שנו את ההרשאה ליד כתובת האתר ב-Chrome.'; return false; }
+    try {
+      var result = await Notification.requestPermission();
+      $('#notifyStatus').textContent = result === 'granted' ? 'ההתראות אושרו.' : 'לא ניתנה הרשאה להתראות.';
+      return result === 'granted';
+    } catch (e) { $('#notifyStatus').textContent = 'לא ניתן לבקש הרשאה להתראות בדפדפן הזה.'; return false; }
+  }
+  function fireReminder(pref, id, title, body, page) {
+    if (!notifyPrefs[pref] || !('Notification' in window) || Notification.permission !== 'granted') return;
+    var sent = store.get('reminderSent', []);
+    if (!Array.isArray(sent)) sent = [];
+    if (sent.indexOf(id) >= 0) return;
+    sent.push(id); store.set('reminderSent', sent.slice(-120));
+    try {
+      var notice = new Notification(title, { body: body, tag: id });
+      notice.onclick = function () { window.focus(); notice.close(); showPage(page); };
+      setTimeout(function () { notice.close(); }, 12000);
+    } catch (e) {}
+  }
+  function checkReminders() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    var now = new Date(), mins = now.getHours() * 60 + now.getMinutes();
+    if (mins >= 20 * 60) {
+      var nd = nextDay(now);
+      if (nd) {
+        var subjects = [], seen = {};
+        nd.ls.forEach(function (x) { if (!seen[x.name]) { seen[x.name] = true; subjects.push(x.name); } });
+        fireReminder('schedule', 'schedule:' + iso(nd.dt), 'מסדרים את התיק?', dayLabel(nd) + ': ' + subjects.join(' · '), 'sched');
+      }
+    }
+    EXAMS.forEach(function (exam) {
+      var days = daysUntil(now, exam.d);
+      if ((days === 7 || days === 1) && mins >= 18 * 60)
+        fireReminder('exams', 'exam:' + exam.d + ':' + days, 'מתחילים להתכונן למבחן', 'מבחן ב' + exam.s + ' ' + untilTxt(days) + '. כדאי לחלק את הלמידה לחלקים קצרים.', 'exams');
+      if (days === 0 && mins >= 7 * 60)
+        fireReminder('exams', 'exam:' + exam.d + ':today', 'היום יש מבחן ב' + exam.s, 'בהצלחה! נשימה עמוקה ובדיקה אחרונה של הציוד.', 'exams');
+    });
+    tasks.filter(function (task) { return !task.done && task.due; }).forEach(function (task) {
+      var days = daysUntil(now, task.due);
+      if ((days === 1 && mins >= 18 * 60) || (days === 0 && mins >= 7 * 60))
+        fireReminder('tasks', 'task:' + task.id + ':' + task.due, 'תזכורת למשימה', task.text + (task.subj ? ' · ' + task.subj : '') + (days === 1 ? ' · להגשה מחר' : ' · להגשה היום'), 'tasks');
+    });
+  }
+  $('#themeSelect').addEventListener('change', function () { themeMode = $('#themeSelect').value; store.set('themeMode', themeMode); applyTheme(); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener && window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { if (themeMode === 'device') applyTheme(); });
+  $('[data-reminder]').forEach(function (el) {
+    el.addEventListener('change', async function () {
+      if (el.checked && !(await ensureNotificationPermission())) { el.checked = false; return; }
+      notifyPrefs[el.dataset.reminder] = el.checked; saveNotifyPrefs();
+    });
+  });
+  $('#notifyAll').addEventListener('click', async function () {
+    if (!(await ensureNotificationPermission())) return;
+    reminderKeys.forEach(function (k) { notifyPrefs[k] = true; });
+    saveNotifyPrefs(); $('#notifyStatus').textContent = 'כל התזכורות הופעלו. הן נבדקות כשהפורטל פתוח.';
+    checkReminders();
+  });
+  $('#notifyNone').addEventListener('click', function () {
+    reminderKeys.forEach(function (k) { notifyPrefs[k] = false; });
+    saveNotifyPrefs(); $('#notifyStatus').textContent = 'כל התזכורות כובו.';
+  });
+  $('#notifyTest').addEventListener('click', async function () {
+    if (!(await ensureNotificationPermission())) return;
+    try { new Notification('בדיקת התראות', { body: 'ההתראות בפורטל מוכנות.' }); $('#notifyStatus').textContent = 'התראת בדיקה נשלחה.'; }
+    catch (e) { $('#notifyStatus').textContent = 'לא ניתן להציג התראה כרגע.'; }
+  });
+  applyTheme(); renderSettings();
 
   function tickClock() {
     var n = new Date();
@@ -946,36 +1071,42 @@
   /* ======================================================
      SCHEDULE (כיתה ז'1) + EXAMS + LIVE SYNC
   ====================================================== */
-  var DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי'], PER = 10;
-  var SLOTS = [   /* לפי לוח הצלצולים: הפסקה אחרי כל שני שיעורים (2, 4, 6, 8) */
+  var DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי'], PER = 8;
+  var SLOTS = [   /* לפי מערכת כיתה ז׳1 המעודכנת */
     { n: 0, s: '07:45', e: '08:30' }, { n: 1, s: '08:30', e: '09:15' }, { n: 2, s: '09:15', e: '09:55' },
     { brk: 1, s: '09:55', e: '10:20' },
     { n: 3, s: '10:20', e: '11:05' }, { n: 4, s: '11:05', e: '11:50' },
     { brk: 1, s: '11:50', e: '12:15' },
     { n: 5, s: '12:15', e: '13:00' }, { n: 6, s: '13:00', e: '13:45' },
     { brk: 1, s: '13:45', e: '13:55' },
-    { n: 7, s: '13:55', e: '14:40' }, { n: 8, s: '14:40', e: '15:15' },
-    { brk: 1, s: '15:15', e: '15:20' },
-    { n: 9, s: '15:20', e: '16:05' }
+    { n: 7, s: '13:55', e: '14:40' }
   ];
   /* אינדקס = מספר שעה (0..7) */
   var DEF_SCHED = {
-    0: ['', 'חינוך', 'עברית', 'עברית', 'חינוך גופני', 'מתמטיקה', 'מתמטיקה', 'JERUSTEM'],
+    0: ['', 'חינוך', 'עברית', 'חינוך גופני', 'מתמטיקה', 'מתמטיקה', '', 'JERUSTEM'],
     1: ['', 'תרבות ישראל', 'תנ"ך', 'מדעים', 'מדעים', 'עברית עם הודיה', '', ''],
     2: ['', 'מתמטיקה', 'מתמטיקה', 'אנגלית', 'אנגלית', 'מקצועות בחירה', 'מקצועות בחירה', ''],
-    3: ['JERUSTEM', 'מתמטיקה', 'מתמטיקה', 'techschool ספרות', 'techschool ספרות', 'תרבות ישראל', 'תנ"ך', ''],
+    3: ['', 'מתמטיקה', 'מתמטיקה', 'techschool ספרות', 'techschool ספרות', 'תרבות ישראל', 'תנ"ך', 'JERUSTEM'],
     4: ['מרכז למידה', 'אנגלית', 'אנגלית', 'עברית', 'חינוך', 'techschool מרכז למידה', 'מרכז למידה', '']
   };
-  Object.keys(DEF_SCHED).forEach(function (d) { while (DEF_SCHED[d].length < PER) DEF_SCHED[d].push(''); });
   var EXAMS = [
     { d: '2026-10-21', s: 'ספרות' }, { d: '2026-10-25', s: 'עברית' }, { d: '2026-10-26', s: 'מדעים' },
-    { d: '2026-11-02', s: 'תנ"ך' }, { d: '2026-11-03', s: 'אנגלית' }, { d: '2026-11-08', s: 'מתמטיקה' },
+    { d: '2026-11-03', s: 'אנגלית' }, { d: '2026-11-04', s: 'תנ"ך' }, { d: '2026-11-08', s: 'מתמטיקה' },
     { d: '2026-11-11', s: 'תרבות ישראל' },
     { d: '2026-12-13', s: 'עברית' }, { d: '2026-12-16', s: 'ספרות' }, { d: '2026-12-21', s: 'תנ"ך' },
     { d: '2026-12-23', s: 'תרבות ישראל' }, { d: '2026-12-29', s: 'אנגלית' },
     { d: '2027-01-03', s: 'מתמטיקה' }, { d: '2027-01-04', s: 'מדעים' }
   ];
-  var sched = store.get('sched2', null) || JSON.parse(JSON.stringify(DEF_SCHED));
+  /* החלף מערכת ישנה שנשמרה אצל משתמשים לגרסה המעודכנת מהתמונה. */
+  var SCHEDULE_VERSION = 2;
+  var schedVersion = Number(store.get('schedVersion', 0)) || 0;
+  var sched = schedVersion < SCHEDULE_VERSION
+    ? JSON.parse(JSON.stringify(DEF_SCHED))
+    : (store.get('sched2', null) || JSON.parse(JSON.stringify(DEF_SCHED)));
+  if (schedVersion < SCHEDULE_VERSION) {
+    store.set('sched2', sched);
+    store.set('schedVersion', SCHEDULE_VERSION);
+  }
 
   function toMin(t) { var p = t.split(':'); return (+p[0]) * 60 + (+p[1]); }
   function lesson(d, p) { return String((sched[d] && sched[d][p]) || '').trim(); }
@@ -1104,7 +1235,7 @@
   });
   $('#schedClear').addEventListener('click', function () {
     if (!confirm('לשחזר את מערכת השעות המקורית? שינויים שעשיתם יימחקו.')) return;
-    sched = JSON.parse(JSON.stringify(DEF_SCHED)); store.set('sched2', sched); buildSched();
+    sched = JSON.parse(JSON.stringify(DEF_SCHED)); store.set('sched2', sched); store.set('schedVersion', SCHEDULE_VERSION); buildSched();
   });
 
   /* ======================================================
@@ -1266,7 +1397,7 @@
   function tmStop() { clearInterval(tm.iv); tm.run = false; }
   function tmTick() {
     tm.left = Math.max(0, Math.round((tm.end - Date.now()) / 1000));
-    if (tm.left <= 0) { tmStop(); $('#tmMsg').textContent = 'הזמן הסתיים'; beep(); }
+    if (tm.left <= 0) { tmStop(); $('#tmMsg').textContent = 'הזמן הסתיים'; beep(); fireReminder('timer', 'timer:' + Date.now(), 'זמן הלמידה הסתיים', 'אפשר לקחת הפסקה קצרה ולחזור כשתהיו מוכנים.', 'timer'); }
     tmDraw();
   }
   function tmSet(min) { tmStop(); tm.total = tm.left = Math.round(min * 60); $('#tmMsg').textContent = ''; tmDraw(); }
@@ -1908,20 +2039,10 @@
     { name: 'תלייה בעברית', desc: 'נחשו את המילה', ico: '🔤', fn: gHangman }
   ];
   var EMBEDS = [
-    { name: '2048 המקורי', desc: 'מקור פתוח (GitHub Pages)', ico: '🔢', url: 'https://gabrielecirulli.github.io/2048/', tag: 'ok' },
-    { name: 'Hextris', desc: 'טטריס משושה', ico: '⬡', url: 'https://hextris.github.io/hextris/', tag: 'ok' },
-    { name: 'Clumsy Bird', desc: 'משחק ציפור', ico: '🐤', url: 'https://ellisonleao.github.io/clumsy-bird/', tag: 'ok' },
-    { name: 'Floppy Bird', desc: 'משחק ציפור', ico: '🐦', url: 'https://nebez.github.io/floppybird/', tag: 'ok' },
-    { name: 'React Tetris', desc: 'טטריס', ico: '🧱', url: 'https://chvin.github.io/react-tetris/', tag: 'ok' },
-    { name: 'שחמט חי (Lichess)', desc: 'הטמעה רשמית', ico: '♟️', url: 'https://lichess.org/tv/frame?theme=brown&bg=dark', tag: 'ok' },
-    { name: 'חידות שחמט (Lichess)', desc: 'הטמעה רשמית', ico: '🧩', url: 'https://lichess.org/training/frame?theme=brown&bg=dark', tag: 'ok' },
-    { name: 'Poki', desc: 'אלפי משחקים', ico: '🕹️', url: 'https://poki.com', tag: 'maybe' },
-    { name: 'CrazyGames', desc: 'אקשן ורב-משתתפים', ico: '🚀', url: 'https://www.crazygames.com', tag: 'maybe' },
-    { name: 'Y8 Games', desc: 'קלאסיקות', ico: '👾', url: 'https://www.y8.com', tag: 'maybe' },
-    { name: 'Miniclip', desc: 'ספורט ופאזלים', ico: '⚽', url: 'https://www.miniclip.com/games/en/', tag: 'maybe' },
-    { name: 'Slither.io', desc: 'נחש אונליין', ico: '🐍', url: 'https://slither.io', tag: 'maybe' },
-    { name: 'Krunker.io', desc: 'יריות מגוף ראשון', ico: '🎯', url: 'https://krunker.io', tag: 'maybe' },
-    { name: 'Chess.com', desc: 'שחמט אונליין', ico: '♞', url: 'https://www.chess.com/play/online', tag: 'maybe' }
+    { name: '2048 המקורי', desc: 'משחק מספרים במקור פתוח', ico: '🔢', url: 'https://gabrielecirulli.github.io/2048/', tag: 'ok' },
+    { name: 'React Tetris', desc: 'טטריס ב-GitHub Pages', ico: '🧱', url: 'https://chvin.github.io/react-tetris/', tag: 'ok' },
+    { name: 'שחמט חי (Lichess)', desc: 'הטמעה רשמית של Lichess', ico: '♟️', url: 'https://lichess.org/tv/frame?theme=brown&bg=light', tag: 'ok' },
+    { name: 'חידות שחמט יומיות (Lichess)', desc: 'הטמעה רשמית של Lichess', ico: '🧩', url: 'https://lichess.org/training/frame?theme=brown&bg=light', tag: 'ok' }
   ];
 
   function cardsHTML(arr, kind, f) {
@@ -1979,7 +2100,9 @@
     stopGame(); showPlayer(e.name, true); curUrl = e.url;
     var f = document.createElement('iframe');
     f.title = e.name;
-    f.setAttribute('allow', 'fullscreen; autoplay; gamepad; clipboard-write');
+    f.loading = 'eager'; f.referrerPolicy = 'strict-origin-when-cross-origin';
+    f.setAttribute('allowfullscreen', '');
+    f.setAttribute('allow', 'fullscreen; autoplay; gamepad; clipboard-write; pointer-lock');
     f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-modals allow-pointer-lock');
     f.src = e.url; $('#gStage').appendChild(f); current = {};
   }
@@ -2001,7 +2124,7 @@
   /* ======================================================
      SECRET CODE + PANIC BUTTON
   ====================================================== */
-  var input = $('#advInput'), msg = $('#advMsg'), details = $('details.adv');
+  var input = $('#settingsGameCode'), msg = $('#settingsGameMsg');
   function hash(str) { var h = 5381; for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0; return h; }
   var SECRET = hash('EEEEE555');
 
@@ -2013,14 +2136,14 @@
     if (document.fullscreenElement && document.exitFullscreen) { try { document.exitFullscreen(); } catch (e) {} }
     stopGame();
     games.classList.add('hidden'); portal.classList.remove('hidden');
-    input.value = ''; msg.textContent = ''; if (details) details.open = false;
+    input.value = ''; msg.textContent = '';
     showPage('home');
   }
   function submitCode() {
     if (hash(input.value.trim()) === SECRET) { input.value = ''; showGames(); }
     else { msg.textContent = 'הקוד שגוי'; input.value = ''; }
   }
-  $('#advBtn').addEventListener('click', submitCode);
+  $('#settingsGameCodeBtn').addEventListener('click', submitCode);
   input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submitCode(); } else msg.textContent = ''; });
   $('#gPanic').addEventListener('click', panic);
   $('#hot').addEventListener('click', panic);
@@ -2035,7 +2158,7 @@
   window.onhelp = function () { return false; };
 
   /* ---------- init ---------- */
-  buildSched(); renderTasks(); grRender(); nRenderList(); nRenderEditor(); tmDraw(); renderExams(); ready = true; renderHome();
+  buildSched(); renderTasks(); grRender(); nRenderList(); nRenderEditor(); tmDraw(); renderExams(); ready = true; renderHome(); checkReminders(); setInterval(checkReminders, 30000);
   }
 
   boot();
@@ -2043,3 +2166,4 @@
 </script>
 </body>
 </html>
+
